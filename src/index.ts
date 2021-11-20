@@ -19,8 +19,17 @@ const animate = (): void => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   player.draw(ctx);
 
-  projectiles.forEach((projectile) => {
+  projectiles.forEach((projectile, index) => {
     projectile.update(ctx);
+
+    if (
+      projectile.x - projectile.radius < 0 ||
+      projectile.x + projectile.radius > canvas.width ||
+      projectile.y - projectile.radius < 0 ||
+      projectile.y + projectile.radius > canvas.height
+    ) {
+      projectiles.splice(index, 1);
+    }
   });
 };
 
