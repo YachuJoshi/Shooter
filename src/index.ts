@@ -1,11 +1,16 @@
 import { initCanvas } from "./canvas";
 import { Player } from "./player";
 import { Projectile } from "./projectile";
+import { Enemy } from "./enemy";
 import "./style.css";
 
+type Object = Player | Enemy | Projectile;
+
 let interval: number;
+let enemyInterval: NodeJS.Timer;
 const { canvas, ctx } = initCanvas();
 const projectiles: Projectile[] = [];
+const enemies: Enemy[] = [];
 
 const player = new Player({
   x: canvas.width / 2,
@@ -13,6 +18,43 @@ const player = new Player({
   radius: 30,
   color: "blue",
 });
+
+const checkBoundaryCollision = (object: Object): boolean => {
+  return (
+    object.x - object.radius < 0 ||
+    object.x + object.radius > canvas.width ||
+    object.y - object.radius < 0 ||
+    object.y + object.radius > canvas.height
+  );
+};
+
+const getDistance = (self: Object, next: Object): number => {
+  return Math.hypot(self.x - next.x, self.y - next.y);
+};
+
+const spawnEnemies = (): void => {
+  enemyInterval = setInterval(() => {
+    const radius = Math.random() * (30 - 4) + 4;
+    let x, y;
+    if (Math.random() < 0.5) {
+      x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
+      y = Math.random() * canvas.height;
+    } else {
+      x = Math.random() * canvas.width;
+      y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
+    }
+
+    // const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+
+    const angle = Math.atan2(canvas.height / 2 - y, canvas.width / 2 - x);
+    const velocity = {
+      // Direction
+      x: Math.cos(angle),
+      y: Math.sin(angle),
+    };
+    enemies.push(new Enemy({ x, y, radius, color: "green", velocity }));
+  }, 1000);
+};
 
 const animate = (): void => {
   interval = requestAnimationFrame(animate);
@@ -22,21 +64,45 @@ const animate = (): void => {
   projectiles.forEach((projectile, index) => {
     projectile.update(ctx);
 
-    if (
-      projectile.x - projectile.radius < 0 ||
-      projectile.x + projectile.radius > canvas.width ||
-      projectile.y - projectile.radius < 0 ||
-      projectile.y + projectile.radius > canvas.height
-    ) {
-      projectiles.splice(index, 1);
+    if (checkBoundaryCollision(projectile)) {
+      setTimeout(() => {
+        projectiles.splice(index, 1);
+      }, 0);
     }
+  });
+
+  enemies.forEach((enemy, eIndex) => {
+    enemy.update(ctx);
+
+    const enemyPlayerDistance = getDistance(enemy, player);
+    if (enemyPlayerDistance - enemy.radius - player.radius < 1) {
+      cancelAnimationFrame(interval);
+      clearInterval(enemyInterval);
+    }
+
+    projectiles.forEach((projectile, pIndex) => {
+      const enemyProjectileDistance = getDistance(enemy, projectile);
+      if (enemyProjectileDistance - enemy.radius - projectile.radius < 1) {
+        // Remove projectile
+        enemy.radius -= 10;
+        setTimeout(() => {
+          projectiles.splice(pIndex, 1);
+        }, 0);
+
+        if (enemy.radius - 10 < 5) {
+          setTimeout(() => {
+            enemies.splice(eIndex, 1);
+          }, 0);
+        }
+      }
+    });
   });
 };
 
 canvas.addEventListener("click", (e) => {
   const angle = Math.atan2(
-    canvas.height / 2 - e.clientY,
-    canvas.width / 2 - e.clientX
+    e.clientY - canvas.height / 2,
+    e.clientX - canvas.width / 2
   );
   projectiles.push(
     new Projectile({
@@ -45,11 +111,12 @@ canvas.addEventListener("click", (e) => {
       radius: 5,
       color: "red",
       velocity: {
-        x: -Math.cos(angle) * 2,
-        y: -Math.sin(angle) * 2,
+        x: Math.cos(angle) * 2,
+        y: Math.sin(angle) * 2,
       },
     })
   );
 });
 
 animate();
+spawnEnemies();
