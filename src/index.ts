@@ -2,6 +2,7 @@ import { initCanvas } from "./canvas";
 import { Player } from "./player";
 import { Projectile } from "./projectile";
 import { Enemy } from "./enemy";
+import gsap from "gsap";
 import "./style.css";
 
 type Object = Player | Enemy | Projectile;
@@ -15,8 +16,8 @@ const enemies: Enemy[] = [];
 const player = new Player({
   x: canvas.width / 2,
   y: canvas.height / 2,
-  radius: 30,
-  color: "blue",
+  radius: 20,
+  color: "white",
 });
 
 const checkBoundaryCollision = (object: Object): boolean => {
@@ -44,7 +45,7 @@ const spawnEnemies = (): void => {
       y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
     }
 
-    // const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+    const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
 
     const angle = Math.atan2(canvas.height / 2 - y, canvas.width / 2 - x);
     const velocity = {
@@ -52,13 +53,14 @@ const spawnEnemies = (): void => {
       x: Math.cos(angle),
       y: Math.sin(angle),
     };
-    enemies.push(new Enemy({ x, y, radius, color: "green", velocity }));
+    enemies.push(new Enemy({ x, y, radius, color, velocity }));
   }, 1000);
 };
 
 const animate = (): void => {
   interval = requestAnimationFrame(animate);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   player.draw(ctx);
 
   projectiles.forEach((projectile, index) => {
@@ -82,9 +84,13 @@ const animate = (): void => {
 
     projectiles.forEach((projectile, pIndex) => {
       const enemyProjectileDistance = getDistance(enemy, projectile);
+
+      // Enemy / Particle collision
       if (enemyProjectileDistance - enemy.radius - projectile.radius < 1) {
         // Remove projectile
-        enemy.radius -= 10;
+        gsap.to(enemy, {
+          radius: enemy.radius - 10,
+        });
         setTimeout(() => {
           projectiles.splice(pIndex, 1);
         }, 0);
@@ -109,7 +115,7 @@ canvas.addEventListener("click", (e) => {
       x: canvas.width / 2,
       y: canvas.height / 2,
       radius: 5,
-      color: "red",
+      color: "white",
       velocity: {
         x: Math.cos(angle) * 2,
         y: Math.sin(angle) * 2,
