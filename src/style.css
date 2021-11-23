@@ -17,3 +17,11 @@ body {
   font-family: "Poppins", sans-serif;
   overflow: hidden;
 }
+
+.score-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: #ffffff;
+  user-select: none;
+}

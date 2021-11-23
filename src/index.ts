@@ -3,6 +3,7 @@ import { Player } from "./player";
 import { Projectile } from "./projectile";
 import { Enemy } from "./enemy";
 import { Particle } from "./particle";
+import { scoreElement } from "./elements";
 import gsap from "gsap";
 import "./style.css";
 
@@ -10,6 +11,7 @@ type Object = Player | Enemy | Projectile;
 
 let interval: number;
 let enemyInterval: NodeJS.Timer;
+let score: number = 0;
 const { canvas, ctx } = initCanvas();
 const projectiles: Projectile[] = [];
 const enemies: Enemy[] = [];
@@ -64,6 +66,7 @@ const animate = (): void => {
   ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   player.draw(ctx);
+  scoreElement.textContent = `${score}`;
 
   projectiles.forEach((projectile, index) => {
     projectile.update(ctx);
@@ -93,6 +96,7 @@ const animate = (): void => {
 
       // Enemy / Particle collision
       if (enemyProjectileDistance - enemy.radius - projectile.radius < 1) {
+        // Create particle
         for (let i = 0; i < 8; i++) {
           particles.push(
             new Particle({
@@ -108,17 +112,20 @@ const animate = (): void => {
           );
         }
 
-        // Remove projectile
-        gsap.to(enemy, {
-          radius: enemy.radius - 10,
-        });
-        setTimeout(() => {
-          projectiles.splice(pIndex, 1);
-        }, 0);
-
-        if (enemy.radius - 10 < 5) {
+        if (enemy.radius - 10 > 5) {
+          // Shrink Enemy
+          score += 100;
+          gsap.to(enemy, {
+            radius: enemy.radius - 10,
+          });
+          setTimeout(() => {
+            projectiles.splice(pIndex, 1);
+          }, 0);
+        } else {
+          score += 250;
           setTimeout(() => {
             enemies.splice(eIndex, 1);
+            projectiles.splice(pIndex, 1);
           }, 0);
         }
       }
