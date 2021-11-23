@@ -2,6 +2,7 @@ import { initCanvas } from "./canvas";
 import { Player } from "./player";
 import { Projectile } from "./projectile";
 import { Enemy } from "./enemy";
+import { Particle } from "./particle";
 import gsap from "gsap";
 import "./style.css";
 
@@ -12,6 +13,7 @@ let enemyInterval: NodeJS.Timer;
 const { canvas, ctx } = initCanvas();
 const projectiles: Projectile[] = [];
 const enemies: Enemy[] = [];
+const particles: Particle[] = [];
 
 const player = new Player({
   x: canvas.width / 2,
@@ -73,6 +75,10 @@ const animate = (): void => {
     }
   });
 
+  particles.forEach((particle) => {
+    particle.update(ctx);
+  });
+
   enemies.forEach((enemy, eIndex) => {
     enemy.update(ctx);
 
@@ -87,6 +93,21 @@ const animate = (): void => {
 
       // Enemy / Particle collision
       if (enemyProjectileDistance - enemy.radius - projectile.radius < 1) {
+        for (let i = 0; i < 8; i++) {
+          particles.push(
+            new Particle({
+              x: enemy.x,
+              y: enemy.y,
+              radius: 4,
+              color: enemy.color,
+              velocity: {
+                x: Math.random() < 0.5 ? -Math.random() : Math.random(),
+                y: Math.random() < 0.5 ? -Math.random() : Math.random(),
+              },
+            })
+          );
+        }
+
         // Remove projectile
         gsap.to(enemy, {
           radius: enemy.radius - 10,
