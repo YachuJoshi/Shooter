@@ -3,7 +3,11 @@ import { Player } from "./player";
 import { Projectile } from "./projectile";
 import { Enemy } from "./enemy";
 import { Particle } from "./particle";
-import { scoreElement } from "./elements";
+import {
+  scoreElement,
+  startGameContainer,
+  startButtonElement,
+} from "./elements";
 import gsap from "gsap";
 import "./style.css";
 
@@ -152,5 +156,8 @@ canvas.addEventListener("click", (e) => {
   );
 });
 
-animate();
+startButtonElement.addEventListener("click", () => {
+  startGameContainer.style.display = "none";
+  animate();
+});
 spawnEnemies();
