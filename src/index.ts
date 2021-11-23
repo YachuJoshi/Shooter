@@ -7,6 +7,9 @@ import {
   scoreElement,
   startGameContainer,
   startButtonElement,
+  gameOverContainerElement,
+  finalScoreElement,
+  restartGameButtonElement,
 } from "./elements";
 import gsap from "gsap";
 import "./style.css";
@@ -17,9 +20,9 @@ let interval: number;
 let enemyInterval: NodeJS.Timer;
 let score: number = 0;
 const { canvas, ctx } = initCanvas();
-const projectiles: Projectile[] = [];
-const enemies: Enemy[] = [];
-const particles: Particle[] = [];
+let projectiles: Projectile[] = [];
+let enemies: Enemy[] = [];
+let particles: Particle[] = [];
 
 const player = new Player({
   x: canvas.width / 2,
@@ -91,6 +94,8 @@ const animate = (): void => {
 
     const enemyPlayerDistance = getDistance(enemy, player);
     if (enemyPlayerDistance - enemy.radius - player.radius < 1) {
+      gameOverContainerElement.style.display = "flex";
+      finalScoreElement.textContent = `${score}`;
       cancelAnimationFrame(interval);
       clearInterval(enemyInterval);
     }
@@ -137,6 +142,18 @@ const animate = (): void => {
   });
 };
 
+const init = () => {
+  projectiles = [];
+  enemies = [];
+  particles = [];
+  score = 0;
+
+  startGameContainer.style.display = "none";
+  gameOverContainerElement.style.display = "none";
+  animate();
+  spawnEnemies();
+};
+
 canvas.addEventListener("click", (e) => {
   const angle = Math.atan2(
     e.clientY - canvas.height / 2,
@@ -157,7 +174,9 @@ canvas.addEventListener("click", (e) => {
 });
 
 startButtonElement.addEventListener("click", () => {
-  startGameContainer.style.display = "none";
-  animate();
+  init();
 });
-spawnEnemies();
+
+restartGameButtonElement.addEventListener("click", () => {
+  init();
+});

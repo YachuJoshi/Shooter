@@ -27,7 +27,8 @@ body {
   user-select: none;
 }
 
-.start-game-container {
+.start-game-container,
+.game-over-container {
   position: absolute;
   background: #ffffff;
   padding: 40px;
@@ -42,11 +43,13 @@ body {
   align-items: center;
 }
 
-.start-game-container h1 {
+.start-game-container h1,
+.game-over-container h1 {
   line-height: 100%;
 }
 
-.start-btn {
+.start-btn,
+.restart-game-btn {
   font-family: inherit;
   border: none;
   background: #4169e1;
