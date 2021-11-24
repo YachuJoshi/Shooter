@@ -11,6 +11,7 @@ import {
   finalScoreElement,
   restartGameButtonElement,
 } from "./elements";
+import bgAudio from "../audio/background.wav";
 import gsap from "gsap";
 import "./style.css";
 
@@ -27,6 +28,8 @@ let projectiles: Projectile[] = [];
 let enemies: Enemy[] = [];
 let particles: Particle[] = [];
 let isGameRunning: boolean = false;
+const backgroundAudio = new Audio();
+backgroundAudio.src = bgAudio;
 
 const playerMovementKeys: PlayerMovement = {
   w: "UP",
@@ -160,9 +163,12 @@ const init = () => {
     radius: 20,
     color: "white",
   });
+  backgroundAudio.play();
 
   startGameContainer.style.display = "none";
   gameOverContainerElement.style.display = "none";
+  backgroundAudio.play();
+  backgroundAudio.loop = true;
   animate();
   spawnEnemies();
 };
