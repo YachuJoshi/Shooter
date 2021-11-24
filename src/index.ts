@@ -1,7 +1,7 @@
 import { initCanvas } from "./canvas";
 import { Player } from "./player";
-import { Projectile } from "./projectile";
 import { Enemy } from "./enemy";
+import { Projectile } from "./projectile";
 import { Particle } from "./particle";
 import {
   scoreElement,
@@ -11,52 +11,25 @@ import {
   finalScoreElement,
   restartGameButtonElement,
 } from "./elements";
-import bgAudio from "../audio/background.wav";
-import lAudio from "../audio/lose.wav";
+import { backgroundAudio, loseAudio } from "./audio";
+import {
+  playerMovementKeys,
+  checkBoundaryCollision,
+  getDistance,
+} from "./utils";
 import gsap from "gsap";
 import "./style.css";
 
-type Object = Player | Enemy | Projectile;
-interface PlayerMovement {
-  [key: string]: string;
-}
-
 let interval: number;
 let enemyInterval: NodeJS.Timer;
+let player: Player;
 let score: number = 0;
-const { canvas, ctx } = initCanvas();
 let projectiles: Projectile[] = [];
 let enemies: Enemy[] = [];
 let particles: Particle[] = [];
 let isGameRunning: boolean = false;
 
-const backgroundAudio = new Audio();
-backgroundAudio.loop = true;
-const loseAudio = new Audio();
-backgroundAudio.src = bgAudio;
-loseAudio.src = lAudio;
-
-const playerMovementKeys: PlayerMovement = {
-  w: "UP",
-  a: "LEFT",
-  s: "DOWN",
-  d: "RIGHT",
-};
-
-let player: Player;
-
-const checkBoundaryCollision = (object: Object): boolean => {
-  return (
-    object.x - object.radius < 0 ||
-    object.x + object.radius > canvas.width ||
-    object.y - object.radius < 0 ||
-    object.y + object.radius > canvas.height
-  );
-};
-
-const getDistance = (self: Object, next: Object): number => {
-  return Math.hypot(self.x - next.x, self.y - next.y);
-};
+const { canvas, ctx } = initCanvas();
 
 const spawnEnemies = (): void => {
   enemyInterval = setInterval(() => {
@@ -174,7 +147,7 @@ const init = () => {
   gameOverContainerElement.style.display = "none";
 
   backgroundAudio.volume = 0.5;
-  backgroundAudio.play();
+  // backgroundAudio.play();
 
   animate();
   spawnEnemies();
