@@ -12,6 +12,7 @@ import {
   restartGameButtonElement,
 } from "./elements";
 import bgAudio from "../audio/background.wav";
+import lAudio from "../audio/lose.wav";
 import gsap from "gsap";
 import "./style.css";
 
@@ -28,8 +29,12 @@ let projectiles: Projectile[] = [];
 let enemies: Enemy[] = [];
 let particles: Particle[] = [];
 let isGameRunning: boolean = false;
+
 const backgroundAudio = new Audio();
+backgroundAudio.loop = true;
+const loseAudio = new Audio();
 backgroundAudio.src = bgAudio;
+loseAudio.src = lAudio;
 
 const playerMovementKeys: PlayerMovement = {
   w: "UP",
@@ -107,6 +112,8 @@ const animate = (): void => {
       finalScoreElement.textContent = `${score}`;
       cancelAnimationFrame(interval);
       clearInterval(enemyInterval);
+      backgroundAudio.volume = 0.2;
+      loseAudio.play();
     }
 
     projectiles.forEach((projectile, pIndex) => {
@@ -115,7 +122,7 @@ const animate = (): void => {
       // Enemy / Particle collision
       if (enemyProjectileDistance - enemy.radius - projectile.radius < 1) {
         // Create particle
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 10; i++) {
           particles.push(
             new Particle({
               x: enemy.x,
@@ -163,12 +170,12 @@ const init = () => {
     radius: 20,
     color: "white",
   });
-  backgroundAudio.play();
-
   startGameContainer.style.display = "none";
   gameOverContainerElement.style.display = "none";
+
+  backgroundAudio.volume = 0.5;
   backgroundAudio.play();
-  backgroundAudio.loop = true;
+
   animate();
   spawnEnemies();
 };
