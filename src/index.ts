@@ -15,6 +15,9 @@ import gsap from "gsap";
 import "./style.css";
 
 type Object = Player | Enemy | Projectile;
+interface PlayerMovement {
+  [key: string]: string;
+}
 
 let interval: number;
 let enemyInterval: NodeJS.Timer;
@@ -23,13 +26,16 @@ const { canvas, ctx } = initCanvas();
 let projectiles: Projectile[] = [];
 let enemies: Enemy[] = [];
 let particles: Particle[] = [];
+let isGameRunning: boolean = false;
 
-const player = new Player({
-  x: canvas.width / 2,
-  y: canvas.height / 2,
-  radius: 20,
-  color: "white",
-});
+const playerMovementKeys: PlayerMovement = {
+  w: "UP",
+  a: "LEFT",
+  s: "DOWN",
+  d: "RIGHT",
+};
+
+let player: Player;
 
 const checkBoundaryCollision = (object: Object): boolean => {
   return (
@@ -58,11 +64,11 @@ const spawnEnemies = (): void => {
 
     const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
 
-    const angle = Math.atan2(canvas.height / 2 - y, canvas.width / 2 - x);
+    const angle = Math.atan2(player.y - y, player.x - x);
     const velocity = {
       // Direction
-      x: Math.cos(angle),
-      y: Math.sin(angle),
+      x: Math.cos(angle) * 2,
+      y: Math.sin(angle) * 2,
     };
     enemies.push(new Enemy({ x, y, radius, color, velocity }));
   }, 1000);
@@ -143,10 +149,17 @@ const animate = (): void => {
 };
 
 const init = () => {
+  isGameRunning = true;
   projectiles = [];
   enemies = [];
   particles = [];
   score = 0;
+  player = new Player({
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 20,
+    color: "white",
+  });
 
   startGameContainer.style.display = "none";
   gameOverContainerElement.style.display = "none";
@@ -155,22 +168,29 @@ const init = () => {
 };
 
 canvas.addEventListener("click", (e) => {
-  const angle = Math.atan2(
-    e.clientY - canvas.height / 2,
-    e.clientX - canvas.width / 2
-  );
+  const angle = Math.atan2(e.clientY - player.y, e.clientX - player.x);
   projectiles.push(
     new Projectile({
-      x: canvas.width / 2,
-      y: canvas.height / 2,
+      x: player.x,
+      y: player.y,
       radius: 5,
       color: "white",
       velocity: {
-        x: Math.cos(angle) * 2,
-        y: Math.sin(angle) * 2,
+        x: Math.cos(angle) * 4,
+        y: Math.sin(angle) * 4,
       },
     })
   );
+});
+
+document.addEventListener("keydown", (e) => {
+  if (!isGameRunning) return;
+
+  for (const key in playerMovementKeys) {
+    if (e.key === key) {
+      player.move(playerMovementKeys[key]);
+    }
+  }
 });
 
 startButtonElement.addEventListener("click", () => {

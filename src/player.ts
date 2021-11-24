@@ -25,4 +25,21 @@ export class Player {
     ctx.fill();
     ctx.closePath();
   }
+
+  move(direction: string): void {
+    switch (direction) {
+      case "LEFT":
+        this.x -= 15;
+        break;
+      case "RIGHT":
+        this.x += 15;
+        break;
+      case "UP":
+        this.y -= 15;
+        break;
+      case "DOWN":
+        this.y += 15;
+        break;
+    }
+  }
 }
